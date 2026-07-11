@@ -1,0 +1,44 @@
+{
+  "name": "design-token-codemod",
+  "version": "0.1.0",
+  "description": "Find hardcoded colors, turn them into design tokens, and replace them with CSS variables — works in React, Vue, and Next.",
+  "type": "module",
+  "bin": {
+    "dtoken": "bin/cli.js"
+  },
+  "files": [
+    "src",
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "fast-glob": "^3.3.2"
+  },
+  "scripts": {
+    "test": "node test/color.test.mjs",
+    "prepublishOnly": "node test/color.test.mjs"
+  },
+  "keywords": [
+    "design-tokens",
+    "codemod",
+    "css-variables",
+    "design-system",
+    "react",
+    "vue",
+    "nextjs",
+    "cli"
+  ],
+  "author": "heeyoung123",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/heeyoung123/design-token-codemod.git"
+  },
+  "bugs": {
+    "url": "https://github.com/heeyoung123/design-token-codemod/issues"
+  },
+  "homepage": "https://github.com/heeyoung123/design-token-codemod#readme"
+}
