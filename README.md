@@ -6,27 +6,55 @@ is `var(--token)`, which is valid everywhere a color literal is (plain CSS,
 styled-components/emotion, inline `style={{}}`, Tailwind `[...]`, Vue `<style>`).
 No framework-specific codemod needed.
 
-## Usage
+## Install
 
 ```bash
-# 1. Find colors -> writes dtoken.tokens.json (frequency-sorted)
-npx dtoken scan
+# one-off, no install
+npx design-token-codemod scan
 
-# 2. Edit dtoken.tokens.json: rename "color-000000" -> "color-black", etc.
-#    The "match" field is what gets found; the key becomes --<name>.
-
-# 3. Preview
-npx dtoken apply --dry-run
-
-# 4. Apply (requires a clean git tree) -> also writes dtoken.tokens.css
-npx dtoken apply
+# or add to a project
+npm install -D design-token-codemod
 ```
 
-Then import the generated CSS once globally:
+The CLI is exposed as `dtoken`.
+
+## Usage
+
+A typical run goes **scan → name → preview → apply**. Run it from your
+project root.
+
+```bash
+# 1. Scan the codebase. Writes dtoken.tokens.json, sorted by frequency.
+dtoken scan
+
+# 2. Give the tokens real names. Two ways:
+#    a) Edit dtoken.tokens.json by hand: rename the key "color-000000" -> "color-black".
+#       Only the key changes; the "match" field keeps the value it finds.
+#    b) Or name them interactively (Enter = accept suggestion, s = skip):
+dtoken scan --interactive
+
+# 3. Preview every replacement as a diff — nothing is written.
+dtoken apply --dry-run
+
+# 4. Apply. Requires a clean git tree so you can review with `git diff`.
+#    Also writes dtoken.tokens.css and dtoken.tokens.sd.json.
+dtoken apply
+```
+
+Then import the generated CSS once, globally:
 
 ```ts
-import "./dtoken.tokens.css"; // Next: app/layout.tsx · Vite/Vue: main.ts
+import "./dtoken.tokens.css"; // Next.js: app/layout.tsx · Vite/Vue: main.ts
 ```
+
+That's it — every replaced value now reads from a CSS variable, so React, Vue,
+and Next all pick up the same tokens with no per-framework setup.
+
+### Tip: go incrementally
+
+Don't tokenize everything at once. Start with colors only (the safe category),
+review the diff, commit, then turn on dimensions. Use `scan --interactive` to
+keep just the values worth a token and skip the rest.
 
 ## tokens.json
 
