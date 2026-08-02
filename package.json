@@ -1,6 +1,6 @@
 {
   "name": "design-token-codemod",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Find hardcoded colors, turn them into design tokens, and replace them with CSS variables — works in React, Vue, and Next.",
   "type": "module",
   "bin": {
