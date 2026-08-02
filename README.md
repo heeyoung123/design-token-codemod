@@ -90,8 +90,35 @@ dtoken scan                 # find values -> dtoken.tokens.json
 dtoken scan --interactive   # prompt for each token name (Enter=accept, s=skip)
 dtoken apply --dry-run      # preview (marks exact vs "approx ΔE 0.7")
 dtoken apply                # replace + write CSS + Style Dictionary JSON
+dtoken apply --tailwind     # rewrite classNames to named utilities (see below)
 dtoken export               # (re)write CSS + Style Dictionary from tokens.json
 ```
+
+## Tailwind: named utilities instead of `var()`
+
+If your palette lives in `@theme`, Tailwind already generates named utilities
+(`text-primary-400`, `bg-primary-400`, …). There you don't want
+`text-[var(--primary-400)]` — you want the utility. `--tailwind` rewrites the
+whole class:
+
+```bash
+dtoken apply --tailwind --dry-run   # preview
+dtoken apply --tailwind             # text-[#3b82f6]  ->  text-primary-400
+```
+
+```diff
+- <div className="text-[#3b82f6] bg-[#3B82F6]/50 border-[color:#3b82f6]" />
++ <div className="text-primary-400 bg-primary-400/50 border-primary-400" />
+```
+
+- The **token name is the utility suffix.** Name the token to match your
+  `@theme` palette: `@theme` has `--color-primary-400` → name the token
+  `color-primary-400` (the `color-` prefix is dropped in the utility); if it's
+  `--primary-400`, name it `primary-400`.
+- Opacity (`/50`) and the `[color:#hex]` form are preserved; colors with no
+  token are left untouched (safe to run incrementally).
+- Colors come from `@theme`, so `--tailwind` writes **no** CSS or Style
+  Dictionary output — nothing to import.
 
 ## What it detects
 
