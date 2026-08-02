@@ -5,6 +5,7 @@ import { stdin, stdout } from "node:process";
 import { loadConfig } from "../src/config.js";
 import { scan } from "../src/scan.js";
 import { apply } from "../src/apply.js";
+import { applyTailwind } from "../src/tw-classnames.js";
 import { buildMatchers } from "../src/matchers.js";
 import {
   loadTokens,
@@ -120,8 +121,12 @@ async function cmdApply(config, { dryRun }) {
     console.error(`No tokens in ${config.tokensFile}. Run: dtoken scan`);
     process.exit(1);
   }
-  const matchMap = toMatchMap(tokens);
-  const { results, total } = await apply(config, matchMap, { dryRun });
+  // --tailwind: rewrite classNames to named utilities (text-[#hex] -> text-primary-400)
+  // instead of var(). Tailwind reads colors from your @theme palette, so no CSS/SD output.
+  const tailwind = flags.has("--tailwind");
+  const { results, total } = tailwind
+    ? await applyTailwind(config, { dryRun })
+    : await apply(config, toMatchMap(tokens), { dryRun });
 
   for (const r of results) {
     console.log(`\n${r.file}`);
@@ -137,7 +142,7 @@ async function cmdApply(config, { dryRun }) {
   console.log(
     `\n${dryRun ? "[dry-run] would replace" : "Replaced"} ${total} occurrences in ${results.length} files.`,
   );
-  if (!dryRun) {
+  if (!dryRun && !tailwind) {
     writeCssTokens(config.cssOutput, tokens, config.cssSelector);
     writeStyleDictionary(config.styleDictionaryOutput, tokens);
     console.log(`Wrote ${config.cssOutput} (import once globally) and ${config.styleDictionaryOutput}.`);
@@ -165,7 +170,8 @@ else {
   dtoken scan                 find values, write ${config.tokensFile}
   dtoken scan --interactive   prompt for each token name
   dtoken apply --dry-run      preview replacements (shows exact vs approx ΔE)
-  dtoken apply                replace + write CSS & Style Dictionary (needs clean git tree)
+  dtoken apply                replace with var(--token) + write CSS & Style Dictionary
+  dtoken apply --tailwind     rewrite classNames to named utilities (text-[#hex] → text-primary-400)
   dtoken export               (re)write ${config.cssOutput} + ${config.styleDictionaryOutput} from tokens
 
   config (dtoken.config.json): categories ["color","dimension"], namedColors, approxDeltaE
